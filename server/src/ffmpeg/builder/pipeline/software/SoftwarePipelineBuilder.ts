@@ -12,6 +12,7 @@ import dayjs from '@/util/dayjs.js';
 import type { Watermark } from '@tunarr/types';
 import { filter, first, isEmpty, isNull, some } from 'lodash-es';
 import { ImageScaleFilter } from '../../filter/ImageScaleFilter.ts';
+import { PixelFormatFilter } from '../../filter/PixelFormatFilter.ts';
 import { SubtitleFilter } from '../../filter/SubtitleFilter.ts';
 import { SubtitleOverlayFilter } from '../../filter/SubtitleOverlayFilter.ts';
 import { WatermarkFadeFilter } from '../../filter/watermark/WatermarkFadeFilter.ts';
@@ -247,6 +248,22 @@ export class SoftwarePipelineBuilder extends BasePipelineBuilder {
 
     if (this.context.hasSubtitleTextContext()) {
       this.videoInputSource.addOption(new CopyTimestampInputOption());
+
+      // 10-bit sources need to be converted to 8-bit before subtitle burning
+      // because the subtitles filter outputs in a format that some encoders
+      // (like h264_videotoolbox) cannot handle with 10-bit input
+      if (
+        isVideoPipelineContext(this.context) &&
+        this.context.videoStream.bitDepth() > 8 &&
+        this.desiredState.pixelFormat
+      ) {
+        const formatFilter = new PixelFormatFilter(
+          this.desiredState.pixelFormat,
+        );
+        currentState = formatFilter.nextState(currentState);
+        this.videoInputSource.filterSteps.push(formatFilter);
+      }
+
       const filter = new SubtitleFilter(this.subtitleInputSource);
       currentState = filter.nextState(currentState);
       this.videoInputSource.filterSteps.push(filter);
