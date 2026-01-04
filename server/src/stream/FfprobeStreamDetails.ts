@@ -34,9 +34,8 @@ type FfprobeStreamDetailsRequest = {
 
 @injectable()
 export class FfprobeStreamDetails
-  implements StreamDetailsFetcher<FfprobeStreamDetailsRequest>
-{
-  constructor(@inject(FfmpegInfo) private ffmpegInfo: FfmpegInfo) {}
+  implements StreamDetailsFetcher<FfprobeStreamDetailsRequest> {
+  constructor(@inject(FfmpegInfo) private ffmpegInfo: FfmpegInfo) { }
 
   async getStream({
     path,
@@ -137,6 +136,9 @@ export class FfprobeStreamDetails
             lang && LanguageService.isValidLanguageCode(lang)
               ? lang
               : undefined,
+          languageCodeISO6392: lang
+            ? LanguageService.getAlpha3TCode(lang)
+            : undefined,
         } satisfies SubtitleStreamDetails;
       },
     );

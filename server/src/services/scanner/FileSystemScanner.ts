@@ -50,14 +50,14 @@ export abstract class FileSystemScanner {
     protected localMediaDB: LocalMediaDB,
     protected mediaSourceProgressService: MediaSourceProgressService,
     protected mediaSourceDB: MediaSourceDB,
-  ) {}
+  ) { }
 
   async scan(req: LocalScanRequest) {
     this.mediaSourceId = req.mediaSource.uuid;
     if (!req.mediaSource.mediaType || req.mediaSource.type !== 'local') {
       throw new Error(
         'Invalid media source for local scanning: ' +
-          JSON.stringify(req.mediaSource),
+        JSON.stringify(req.mediaSource),
       );
     }
 
@@ -194,7 +194,8 @@ export abstract class FileSystemScanner {
           index: subtitleStream.index ?? 0,
           default: true,
           // forced: true,
-          languageCodeISO6392: subtitleStream.languageCodeISO6392,
+          languageCodeISO6392:
+            subtitleStream.languageCodeISO6392 ?? subtitleStream.language,
           // programVersionId: versionId,
           profile: null,
           pixelFormat: null,
@@ -224,11 +225,11 @@ export abstract class FileSystemScanner {
         frameRate: firstVideoStream?.framerate,
         resolution:
           isDefined(firstVideoStream?.height) &&
-          isDefined(firstVideoStream?.width)
+            isDefined(firstVideoStream?.width)
             ? {
-                widthPx: firstVideoStream.width,
-                heightPx: firstVideoStream.height,
-              }
+              widthPx: firstVideoStream.width,
+              heightPx: firstVideoStream.height,
+            }
             : null,
         scanKind: firstVideoStream?.scanType,
         streams,
